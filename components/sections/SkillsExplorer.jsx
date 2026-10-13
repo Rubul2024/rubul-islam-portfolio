@@ -38,11 +38,11 @@ export default function SkillsExplorer({ items, categories }) {
         </p>
       </div>
 
-      <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 short:mt-5">
+      <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 short:mt-5">
         {visible.map((skill) => (
           <li key={skill.name}>
             <div
-              className="group flex h-full flex-col items-center justify-center gap-4 rounded-2xl border border-line bg-card px-3 py-7 text-center transition-[border-color,transform,box-shadow] duration-300 hover:-translate-y-1 hover:border-[color:var(--brand)] hover:shadow-[0_18px_40px_-24px_var(--brand)] short:py-6"
+              className="group flex h-full flex-col items-center justify-center gap-4 rounded-2xl border border-line bg-card px-3 py-7 text-center lg:px-2 transition-[border-color,transform,box-shadow] duration-300 hover:-translate-y-1 hover:border-[color:var(--brand)] hover:shadow-[0_18px_40px_-24px_var(--brand)] short:py-6"
               style={{ "--brand": skill.style === "mono" ? "var(--fg)" : skill.hex }}
             >
               <span
@@ -73,7 +73,7 @@ export default function SkillsExplorer({ items, categories }) {
                 </svg>
               </span>
               <span>
-                <span className="block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-fg">{skill.name}</span>
+                <span className="block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-fg lg:text-[11px] lg:tracking-[0.1em] xl:text-xs xl:tracking-[0.14em]">{skill.name}</span>
                 <span className="mt-1 block text-[11px] text-subtle">{skill.category}</span>
               </span>
             </div>

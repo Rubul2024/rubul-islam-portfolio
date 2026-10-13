@@ -26,6 +26,7 @@ export const skills = [
   { name: "Elementor", icon: "siElementor", category: "Tools & CMS" },
   // Wide logo: drawn larger so it reads at the same visual weight
   { name: "WooCommerce", icon: "siWoocommerce", category: "Tools & CMS", large: true },
+  { name: "Shopify", icon: "siShopify", category: "Tools & CMS" },
   { name: "Git", icon: "siGit", category: "Tools & CMS" },
   { name: "GitHub", icon: "siGithub", category: "Tools & CMS" },
 ];
