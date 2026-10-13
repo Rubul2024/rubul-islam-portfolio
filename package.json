@@ -1,0 +1,36 @@
+{
+  "name": "rubul-islam-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal portfolio and blog of Rubul Islam, Full Stack Developer (MERN).",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "admin:setup": "node scripts/admin-setup.mjs"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "github-slugger": "^2.0.0",
+    "lucide-react": "^0.545.0",
+    "mongodb": "^7.7.0",
+    "next": "^16.1.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "rehype-slug": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "simple-icons": "^16.35.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.0",
+    "eslint": "^9.36.0",
+    "eslint-config-next": "^16.1.0",
+    "tailwindcss": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}
