@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import LoginForm from "@/components/admin/LoginForm";
 import { getAdminSession } from "@/lib/admin";
-import { getAuthIssue } from "@/lib/auth";
+import { getEnvCredentialsIssue, isSessionSecretConfigured } from "@/lib/auth";
+import { getAdminAccount } from "@/lib/admin-account";
 import { site } from "@/lib/site";
 
 export const metadata = { title: "Sign in" };
@@ -13,10 +14,21 @@ function safeNext(value) {
   return typeof value === "string" && /^\/admin(\/|$)/.test(value) && !value.startsWith("//") ? value : "/admin";
 }
 
+/** What prevents signing in, or null when the form can be shown. */
+async function getLoginIssue() {
+  if (!isSessionSecretConfigured()) return "ADMIN_SESSION_SECRET must be at least 32 characters.";
+  try {
+    if (await getAdminAccount()) return null;
+  } catch {
+    return null; // database briefly unreachable: show the form; the API reports the problem
+  }
+  return getEnvCredentialsIssue() ?? "No admin account is configured.";
+}
+
 export default async function LoginPage({ searchParams }) {
   const next = safeNext((await searchParams).next);
   if (await getAdminSession()) redirect(next);
-  const issue = getAuthIssue();
+  const issue = await getLoginIssue();
 
   return (
     <div className="relative isolate grid min-h-dvh place-items-center overflow-hidden px-4 py-16">

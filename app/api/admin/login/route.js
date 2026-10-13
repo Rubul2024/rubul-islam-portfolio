@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import {
-  SESSION_COOKIE,
-  createSessionToken,
-  getAuthIssue,
-  getPasswordHash,
-  sessionCookieOptions,
-} from "@/lib/auth";
+import { SESSION_COOKIE, createSessionToken, isSessionSecretConfigured, sessionCookieOptions } from "@/lib/auth";
+import { getAdminAccount } from "@/lib/admin-account";
 import { jsonError } from "@/lib/admin";
 import { clearFailures, isLockedOut, recordFailure } from "@/lib/login-throttle";
+
+// Real bcrypt hash of a random value (same cost as account hashes), so a wrong
+// email takes as long to reject as a wrong password. Created on first use.
+let dummyHash;
+function getDummyHash() {
+  dummyHash ??= bcrypt.hash(crypto.randomUUID(), 12);
+  return dummyHash;
+}
 
 function clientIp(request) {
   return (
@@ -19,9 +22,20 @@ function clientIp(request) {
 }
 
 export async function POST(request) {
-  const issue = getAuthIssue();
-  if (issue) {
-    console.error("[auth] Admin login misconfigured:", issue);
+  if (!isSessionSecretConfigured()) {
+    console.error("[auth] ADMIN_SESSION_SECRET is missing or shorter than 32 characters.");
+    return jsonError("Admin login is not configured correctly. Check the server environment variables.", 503);
+  }
+
+  let account;
+  try {
+    account = await getAdminAccount();
+  } catch (error) {
+    console.error("[auth] Couldn't load the admin account", error?.message);
+    return jsonError("Sign-in is temporarily unavailable. Please try again in a moment.", 503);
+  }
+  if (!account) {
+    console.error("[auth] No admin account: set ADMIN_EMAIL and ADMIN_PASSWORD_HASH (npm run admin:setup).");
     return jsonError("Admin login is not configured correctly. Check the server environment variables.", 503);
   }
 
@@ -42,8 +56,10 @@ export async function POST(request) {
   if (!email || !password) return jsonError("Enter your email and password.", 422);
 
   // Always run bcrypt so a wrong email takes as long as a wrong password.
-  const passwordOk = await bcrypt.compare(password.slice(0, 200), getPasswordHash()).catch(() => false);
-  const emailOk = email === process.env.ADMIN_EMAIL.trim().toLowerCase();
+  const emailOk = email === account.email.toLowerCase();
+  const passwordOk = await bcrypt
+    .compare(password.slice(0, 200), emailOk ? account.passwordHash : await getDummyHash())
+    .catch(() => false);
 
   if (!passwordOk || !emailOk) {
     await recordFailure(ip);
@@ -53,6 +69,6 @@ export async function POST(request) {
 
   await clearFailures(ip);
   const response = NextResponse.json({ ok: true });
-  response.cookies.set(SESSION_COOKIE, await createSessionToken(process.env.ADMIN_EMAIL), sessionCookieOptions());
+  response.cookies.set(SESSION_COOKIE, await createSessionToken(account), sessionCookieOptions());
   return response;
 }

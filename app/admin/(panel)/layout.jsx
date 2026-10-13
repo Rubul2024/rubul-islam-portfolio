@@ -15,7 +15,7 @@ export default async function AdminPanelLayout({ children }) {
   const unread = isDbConfigured() ? await getMessageCounts().then((c) => c.new).catch(() => 0) : 0;
 
   return (
-    <AdminShell email={session.sub} unread={unread}>
+    <AdminShell email={session.email} name={session.name} unread={unread}>
       {!isDbConfigured() && (
         <div role="alert" className="mb-8 flex gap-3 rounded-2xl border border-danger/30 bg-danger/10 p-4 text-sm text-fg">
           <AlertTriangle size={18} aria-hidden="true" className="mt-0.5 shrink-0 text-danger" />

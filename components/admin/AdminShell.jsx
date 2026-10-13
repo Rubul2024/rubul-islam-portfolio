@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ExternalLink, FileText, Image as ImageIcon, Inbox, LayoutDashboard, LogOut, Menu, PenSquare, X } from "lucide-react";
+import { ExternalLink, FileText, Image as ImageIcon, Inbox, LayoutDashboard, LogOut, Menu, PenSquare, UserRound, X } from "lucide-react";
 import ThemeToggle from "@/components/layout/ThemeToggle";
 import { ToastProvider, buttonClass } from "@/components/admin/ui";
 import { site } from "@/lib/site";
@@ -15,6 +15,7 @@ const NAV = [
   { href: "/admin/posts/new", label: "New post", icon: PenSquare, exact: true },
   { href: "/admin/messages", label: "Messages", icon: Inbox, badge: "unread" },
   { href: "/admin/media", label: "Media", icon: ImageIcon },
+  { href: "/admin/profile", label: "Profile", icon: UserRound },
 ];
 
 function isActive(pathname, item) {
@@ -23,7 +24,7 @@ function isActive(pathname, item) {
   return pathname.startsWith(item.href) && pathname !== "/admin/posts/new";
 }
 
-function Sidebar({ pathname, email, unread, onNavigate, onLogout, loggingOut }) {
+function Sidebar({ pathname, email, name, unread, onNavigate, onLogout, loggingOut }) {
   return (
     <div className="flex h-full flex-col">
       <Link href="/admin" onClick={onNavigate} className="flex items-center gap-3 px-2">
@@ -82,12 +83,12 @@ function Sidebar({ pathname, email, unread, onNavigate, onLogout, loggingOut }) 
 
       <div className="mt-auto grid gap-3 border-t border-line pt-5">
         <div className="flex items-center justify-between gap-2 px-1">
-          <div className="min-w-0">
-            <p className="text-[13px] font-medium text-fg">{site.name}</p>
+          <Link href="/admin/profile" onClick={onNavigate} className="min-w-0 rounded-lg hover:text-accent-text" title="Edit profile">
+            <p className="truncate text-[13px] font-medium text-fg">{name || site.name}</p>
             <p className="truncate font-mono text-[11px] text-subtle" title={email}>
               {email}
             </p>
-          </div>
+          </Link>
           <ThemeToggle className="size-9 shrink-0" />
         </div>
         <button type="button" onClick={onLogout} disabled={loggingOut} className={cn(buttonClass.ghost, "justify-start")}>
@@ -99,7 +100,7 @@ function Sidebar({ pathname, email, unread, onNavigate, onLogout, loggingOut }) 
   );
 }
 
-export default function AdminShell({ email, unread = 0, children }) {
+export default function AdminShell({ email, name, unread = 0, children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -123,7 +124,7 @@ export default function AdminShell({ email, unread = 0, children }) {
     router.refresh();
   }
 
-  const sidebarProps = { pathname, email, unread, onLogout: logout, loggingOut };
+  const sidebarProps = { pathname, email, name, unread, onLogout: logout, loggingOut };
 
   return (
     <ToastProvider>

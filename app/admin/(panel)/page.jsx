@@ -8,6 +8,7 @@ import { getDashboardStats } from "@/lib/blog/posts";
 import { isDbConfigured } from "@/lib/db";
 import { formatDate } from "@/lib/blog/utils";
 import { getLatestMessages, getMessageCounts } from "@/lib/messages";
+import { getAdminSession } from "@/lib/admin";
 
 export const metadata = { title: "Dashboard" };
 
@@ -45,6 +46,8 @@ function greeting() {
 }
 
 export default async function DashboardPage() {
+  const session = await getAdminSession();
+  const firstName = (session?.name || "there").split(" ")[0];
   const [{ stats, error }, inbox] = await Promise.all([loadStats(), loadInbox()]);
   const { counts } = stats;
 
@@ -58,7 +61,7 @@ export default async function DashboardPage() {
   return (
     <>
       <AdminHeader
-        title={`${greeting()}, Rubul`}
+        title={`${greeting()}, ${firstName}`}
         description={
           inbox.unread
             ? `You have ${inbox.unread} new ${inbox.unread === 1 ? "enquiry" : "enquiries"} waiting.`

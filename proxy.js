@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
 
-// First line of defence for the admin area. Pages and API handlers verify the
-// session again on their own; this just keeps anonymous visitors out early.
+// First line of defence for the admin area: a fast signature + expiry check.
+// Pages and API handlers then verify the session against the current admin
+// account (lib/admin.js); this just keeps anonymous visitors out early.
 
 const PUBLIC_ADMIN_PATHS = ["/admin/login", "/api/admin/login"];
 
@@ -10,12 +11,9 @@ export async function proxy(request) {
   const { pathname, search } = request.nextUrl;
   const session = await verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value);
 
-  if (PUBLIC_ADMIN_PATHS.includes(pathname)) {
-    if (session && pathname === "/admin/login") {
-      return NextResponse.redirect(new URL("/admin", request.url));
-    }
-    return NextResponse.next();
-  }
+  // The login page does its own full check (it redirects signed-in admins),
+  // so an outdated cookie after a password change can't cause a redirect loop.
+  if (PUBLIC_ADMIN_PATHS.includes(pathname)) return NextResponse.next();
 
   if (!session) {
     if (pathname.startsWith("/api/")) {

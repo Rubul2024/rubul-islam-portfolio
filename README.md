@@ -126,11 +126,13 @@ Markdown supports GitHub extras: tables, task lists, strikethrough, fenced code 
 
 - Session: signed, `httpOnly`, `SameSite=Strict` cookie (7 days); `proxy.js` guards `/admin` and `/api/admin`, and every admin page and API route re-checks it
 - Login: bcrypt; 5 failed attempts per 15 minutes per IP, counted in MongoDB so the limit holds across serverless instances
-- Sessions are tied to the password: running `npm run admin:setup` again (new hash) or changing `ADMIN_SESSION_SECRET` signs out every session
+- Sessions are tied to the account: changing the password or email (Profile page) or `ADMIN_SESSION_SECRET` signs out every other session
 - Cross-site writes are rejected; uploads are checked by file signature (SVG is not accepted)
 - `/admin` is `noindex`, uncached and disallowed in `robots.txt`; HSTS is sent in production
 
-**Changing the admin password:** run `npm run admin:setup`, replace `ADMIN_PASSWORD_HASH` in `.env.local` and in Vercel, restart/redeploy.
+**Changing your name, email or password:** use **Profile** in the admin panel (`/admin/profile`). Changes are saved in MongoDB (`admin_account` collection) and apply immediately — no redeploy. Changing the password signs out every other device; changing the email or password needs your current password.
+
+`ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH` are only the *initial* account, used until the first save on the Profile page. **Locked out?** Run `npm run admin:setup`, put the new hash in `ADMIN_PASSWORD_HASH`, and delete the `admin_account` document in MongoDB — the app then falls back to the environment account again.
 
 **If the sign-in page says the hash is invalid:** every `$` in the hash must be written as `\$` in `.env` files (the setup script prints it that way). Paste the same escaped value into Vercel — the app accepts both forms.
 
